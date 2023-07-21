@@ -1,0 +1,17 @@
+{
+	"include": ["src/**/*.ts", "src/**/*.json"],
+	"exclude": ["node_modules", "**/*.test.ts", "logs", "dist"],
+	"compilerOptions": {
+		"target": "es2016",
+		"module": "commonjs",
+		"baseUrl": "./src",
+		"paths": {
+			"@*": ["*"]
+		},
+		"outDir": "./dist",
+		"esModuleInterop": true,
+		"forceConsistentCasingInFileNames": true,
+		"strict": true,
+		"skipLibCheck": true
+	}
+}
