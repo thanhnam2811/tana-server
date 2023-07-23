@@ -1,8 +1,19 @@
-import dotenv from 'dotenv';
-dotenv.config();
+import 'dotenv/config';
 
-const appConfig = {
-	PORT: parseInt(process.env.PORT || '3000'),
+export enum EnvEnum {
+	DEVELOPMENT = 'development',
+	PRODUCTION = 'production',
+	TEST = 'test',
+}
+
+interface IAppConfig {
+	PORT: number;
+	ENV: EnvEnum;
+}
+
+const appConfig: IAppConfig = {
+	PORT: parseInt(process.env.PORT),
+	ENV: process.env.NODE_ENV as EnvEnum,
 };
 
 export default appConfig;

@@ -1,51 +1,41 @@
+import appConfig, { EnvEnum } from '@configs/app-config';
 import winston from 'winston';
 import 'winston-daily-rotate-file';
 
-export class LoggerHelper {
-	// Singleton
-	static _instance: winston.Logger;
-	static get instance() {
-		if (!this._instance) this._instance = LoggerHelper.createLogger();
+export const createLogger = (level?: string) => {
+	const { combine, timestamp, printf, colorize, splat } = winston.format;
+	const upperCaseLevel = winston.format((info) => {
+		info.level = info.level.toUpperCase();
+		return info;
+	});
 
-		return this._instance;
-	}
+	// Common formats for all transports
+	const formats = [
+		timestamp({ format: 'DD/MM/YYYY [-] HH:mm:ss' }),
+		printf(({ level, message, timestamp }) => {
+			return `[${timestamp}] [${level}]: ${message}`;
+		}),
+		splat(),
+	];
 
-	// Methods
-	static createLogger() {
-		const { combine, timestamp, printf, colorize, splat } = winston.format;
-		const upperCaseLevel = winston.format((info) => {
-			info.level = info.level.toUpperCase();
-			return info;
-		});
+	const isProd = appConfig.ENV === EnvEnum.PRODUCTION;
+	level ??= isProd ? 'info' : 'debug';
 
-		// Common formats for all transports
-		const formats = [
-			timestamp({ format: 'DD/MM/YYYY [-] HH:mm:ss' }),
-			printf(({ level, message, timestamp }) => {
-				return `[${timestamp}] [${level}]: ${message}`;
+	return winston.createLogger({
+		level,
+		transports: [
+			new winston.transports.Console({
+				format: combine(upperCaseLevel(), colorize({ all: true }), ...formats),
 			}),
-			splat(),
-		];
+			new winston.transports.DailyRotateFile({
+				filename: `./logs/%DATE%.log`,
+				datePattern: 'YYYY-MM-DD-[[]HH[]]',
+				frequency: '1h',
+				format: combine(upperCaseLevel(), ...formats),
+			}),
+		],
+	});
+};
 
-		return winston.createLogger({
-			transports: [
-				new winston.transports.Console({
-					format: combine(
-						upperCaseLevel(),
-						colorize({ all: true }),
-						...formats
-					),
-				}),
-				new winston.transports.DailyRotateFile({
-					filename: `./logs/%DATE%.log`,
-					datePattern: 'YYYY-MM-DD-[[]HH[]]',
-					frequency: '1h',
-					format: combine(upperCaseLevel(), ...formats),
-				}),
-			],
-		});
-	}
-}
-
-const loggerHelper = LoggerHelper.instance;
+const loggerHelper = createLogger();
 export default loggerHelper;

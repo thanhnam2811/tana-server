@@ -1,7 +1,11 @@
-import BaseRouter from '@abstracts/base-router';
 import loggerHelper from '@helpers/logger-helper';
-import postRouter from '@modules/post/post-router';
-import { Application, Router } from 'express';
+import authRouter from '@modules/auth/auth-router';
+import { Application, RequestHandler, Router } from 'express';
+
+type Route = {
+	router: Router;
+	middlewares: RequestHandler[];
+};
 
 export class RouterManager {
 	// Singleton
@@ -15,28 +19,30 @@ export class RouterManager {
 	}
 
 	// Properties
-	private _routes: BaseRouter[] = [];
+	private _routes: Map<string, Route> = new Map();
 
 	// Constructor
 	private constructor() {
 		// Register routes
-		this._registerRoute(postRouter);
+		this._registerRoute('/auth', authRouter);
 	}
 
 	// Methods
-	private _registerRoute(baseRouter: BaseRouter): void {
-		baseRouter.initRoutes();
-		this._routes.push(baseRouter);
+	private _registerRoute(path: string, router: Router, middlewares: RequestHandler[] = []): void {
+		if (this._routes.has(path)) {
+			loggerHelper.warn(`Route ${path} already exists!`);
+			return;
+		}
 
-		loggerHelper.info(`🔗 Route "${baseRouter.path}" registered!`);
+		this._routes.set(path, { router, middlewares });
 	}
 
 	public initRoutes(app: Application): void {
-		this._routes.forEach((route) => {
-			const { path, router, middlewares } = route;
+		for (const [path, route] of this._routes) {
+			const { router, middlewares } = route;
 
 			app.use(path, ...middlewares, router);
-		});
+		}
 	}
 }
 
