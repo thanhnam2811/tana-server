@@ -1,4 +1,4 @@
-import IController from '@interfaces/IController';
+import IController from '@interfaces/controller-interface';
 import registerHandler, { RegisterDto } from './handlers/register-handler';
 import validatorMiddleware from '@middlewares/validatior-middleware';
 
