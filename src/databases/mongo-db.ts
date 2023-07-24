@@ -1,9 +1,9 @@
 import appConfig, { EnvEnum } from '@configs/app-config';
 import mongoConfig from '@configs/mongo-config';
 import loggerHelper from '@helpers/logger-helper';
+import formatBytes from '@utils/format-bytes';
 import mongoose from 'mongoose';
 import os from 'os';
-import prettyBytes from 'pretty-bytes';
 
 export class MongoDB {
 	// Singleton
@@ -60,7 +60,7 @@ export class MongoDB {
 		const numCore = os.cpus().length;
 		const maxConn = numCore * mongoConfig.MAX_CONNECTION_PER_CORE;
 
-		const memUsage = prettyBytes(process.memoryUsage().rss);
+		const memUsage = formatBytes(process.memoryUsage().rss);
 
 		loggerHelper.info(`🔗 Connections: ${numConn}/${maxConn} - 📊 Memory usage: ${memUsage}`);
 		if (numConn >= maxConn) {
