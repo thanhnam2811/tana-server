@@ -8,6 +8,7 @@ import routerManager from '@managers/router-manager';
 import errorHandlerMiddleware from '@middlewares/error-handler-middleware';
 import loggerMiddleware from '@middlewares/logger-middleware';
 import mongoDB from '@databases/mongo-db';
+import redisDB from '@databases/redis-db';
 
 export class App {
 	// Singleton
@@ -36,6 +37,7 @@ export class App {
 		const line = ''.padStart(50, '=');
 
 		loggerHelper.info('⏳ Starting server...');
+
 		loggerHelper.info(line);
 
 		this._initExpress();
@@ -51,6 +53,8 @@ export class App {
 			loggerHelper.info(`🚀 Server started on port ${this._PORT}!`);
 			loggerHelper.info(line);
 		});
+
+		loggerHelper.info(line);
 	}
 
 	private _initExpress(): void {
@@ -88,6 +92,7 @@ export class App {
 
 	private async _initDatabase(): Promise<void> {
 		await mongoDB.connect();
+		await redisDB.connect();
 
 		loggerHelper.info('✅ Database initialized!');
 	}

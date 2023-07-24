@@ -39,7 +39,18 @@ const validateEnv = () => {
 		MONGO_NAME: str({
 			desc: 'The name of the database to connect to',
 		}),
-		
+
+		// Redis config
+		REDIS_HOST: str({
+			desc: 'The host to connect to the redis server with',
+		}),
+		REDIS_PORT: port({
+			desc: 'The port to connect to the redis server with',
+		}),
+		REDIS_PASS: str({
+			desc: 'The password to connect to the redis server with',
+		}),
+
 		// Mail config
 		MAIL_HOST: str({
 			desc: 'The host to connect to the mail server with',
