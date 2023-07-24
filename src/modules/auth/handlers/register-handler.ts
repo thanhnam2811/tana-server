@@ -1,13 +1,12 @@
 import { HttpException } from '@exceptions/http-exception';
 import loggerHelper from '@helpers/logger-helper';
-import randomHelper from '@helpers/random-helper';
 import UserModel from '@modules/user/user-model';
-import { IsEmail, IsNotEmpty, IsString, IsStrongPassword } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString, IsStrongPassword, Length } from 'class-validator';
 import { RequestHandler } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import otpHelper, { OtpTypeEnums } from '../helpers/otp-helper';
 import passwordHelper from '../helpers/password-helper';
-import sendRegisterMail from '../utils/send-register-mail';
+import sendWelcomeMail from '../utils/send-welcome-mail';
 
 export class RegisterDto {
 	@IsNotEmpty({ message: 'Tên không được để trống!' })
@@ -31,6 +30,11 @@ export class RegisterDto {
 		{ message: 'Mật khẩu phải có ít nhất 8 ký tự, 1 chữ thường, 1 chữ hoa, 1 số và 1 ký tự đặc biệt!' },
 	)
 	password: string;
+
+	@IsNotEmpty({ message: 'Mã OTP không được để trống!' })
+	@IsString({ message: 'Mã OTP không hợp lệ!' })
+	@Length(6, 6, { message: 'Mã OTP phải có 6 ký tự!' })
+	otp: string;
 }
 
 const registerHandler: RequestHandler = async (req, res, next) => {
@@ -43,6 +47,16 @@ const registerHandler: RequestHandler = async (req, res, next) => {
 			throw new HttpException(StatusCodes.CONFLICT, 'Email đã được đăng ký! Vui lòng sử dụng email khác!');
 		}
 
+		// Check OTP
+		const otp = await otpHelper.getOtp(registerDto.email, OtpTypeEnums.REGISTER);
+		if (!otp) {
+			throw new HttpException(StatusCodes.BAD_REQUEST, 'Mã OTP không tồn tại hoặc đã hết hạn!');
+		}
+
+		if (otp !== registerDto.otp) {
+			throw new HttpException(StatusCodes.BAD_REQUEST, 'Mã OTP không đúng!');
+		}
+
 		// Hash password
 		const hashedPassword = await passwordHelper.hash(registerDto.password);
 		registerDto.password = hashedPassword;
@@ -53,16 +67,8 @@ const registerHandler: RequestHandler = async (req, res, next) => {
 		// Log
 		loggerHelper.info(`User ${user.email} registered! ID: ${user._id}`);
 
-		// Create OTP
-		const otpStr = randomHelper.getRandomString(6, { numbers: true });
-		const otp = parseInt(otpStr);
-
-		// Save OTP to Redis
-		const userId = user._id.toString();
-		otpHelper.saveOtp(userId, otpStr, OtpTypeEnums.REGISTER);
-
-		// Send email
-		sendRegisterMail(user.email, user.name, otp);
+		// Send welcome email
+		sendWelcomeMail(user.email, user.name);
 
 		// Response
 		res.status(StatusCodes.CREATED).json({
