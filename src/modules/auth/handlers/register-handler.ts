@@ -5,6 +5,7 @@ import UserModel from '@modules/user/user-model';
 import { IsEmail, IsNotEmpty, IsString, IsStrongPassword } from 'class-validator';
 import { RequestHandler } from 'express';
 import { StatusCodes } from 'http-status-codes';
+import otpHelper, { OtpTypeEnums } from '../helpers/otp-helper';
 import passwordHelper from '../helpers/password-helper';
 import sendRegisterMail from '../utils/send-register-mail';
 
@@ -56,7 +57,9 @@ const registerHandler: RequestHandler = async (req, res, next) => {
 		const otpStr = randomHelper.getRandomString(6, { numbers: true });
 		const otp = parseInt(otpStr);
 
-		// TODO: Save OTP to database
+		// Save OTP to Redis
+		const userId = user._id.toString();
+		otpHelper.saveOtp(userId, otpStr, OtpTypeEnums.REGISTER);
 
 		// Send email
 		sendRegisterMail(user.email, user.name, otp);
