@@ -9,6 +9,8 @@ import errorHandlerMiddleware from '@middlewares/error-handler-middleware';
 import loggerMiddleware from '@middlewares/logger-middleware';
 import mongoDB from '@databases/mongo-db';
 import redisDB from '@databases/redis-db';
+import http from 'http';
+import socketManager from '@managers/socket-manager';
 
 export class App {
 	// Singleton
@@ -23,13 +25,15 @@ export class App {
 	// Properties
 	private _PORT: number;
 	private _ENV: EnvEnum;
-	private _server: Application;
+	private _app: Application;
+	private _server: http.Server;
 
 	// Constructor
 	private constructor() {
 		this._PORT = appConfig.PORT;
 		this._ENV = appConfig.ENV;
-		this._server = express();
+		this._app = express();
+		this._server = http.createServer(this._app);
 	}
 
 	// Methods
@@ -40,11 +44,7 @@ export class App {
 
 		loggerHelper.info(line);
 
-		this._initExpress();
-		this._initMiddlewares();
-		this._initRoutes();
-		this._initErrorHandlers();
-		await this._initDatabase();
+		this._init();
 
 		loggerHelper.info(line);
 
@@ -57,35 +57,44 @@ export class App {
 		loggerHelper.info(line);
 	}
 
-	private _initExpress(): void {
-		this._server.use(express.json());
-		this._server.use(express.urlencoded({ extended: true }));
+	private async _init() {
+		this._initExpress();
+		this._initMiddlewares();
+		this._initRoutes();
+		this._initErrorHandlers();
+		await this._initDatabase();
+		this._initSocket();
+	}
 
-		this._server.use(compression());
-		this._server.use(helmet());
-		this._server.use(cors({ origin: '*' }));
+	private _initExpress(): void {
+		this._app.use(express.json());
+		this._app.use(express.urlencoded({ extended: true }));
+
+		this._app.use(compression());
+		this._app.use(helmet());
+		this._app.use(cors({ origin: '*' }));
 
 		loggerHelper.info('✅ Express initialized!');
 	}
 
 	private _initMiddlewares(): void {
-		this._server.use(loggerMiddleware);
+		this._app.use(loggerMiddleware);
 
 		loggerHelper.info('✅ Middlewares initialized!');
 	}
 
 	private _initRoutes(): void {
-		this._server.get('/', (req, res) => {
+		this._app.get('/', (req, res) => {
 			res.send('Hello world! From TANA with love!');
 		});
 
-		routerManager.initRoutes(this._server);
+		routerManager.initRoutes(this._app);
 
 		loggerHelper.info('✅ Routes initialized!');
 	}
 
 	private _initErrorHandlers(): void {
-		this._server.use(errorHandlerMiddleware);
+		this._app.use(errorHandlerMiddleware);
 
 		loggerHelper.info('✅ Error handlers initialized!');
 	}
@@ -95,6 +104,12 @@ export class App {
 		await redisDB.connect();
 
 		loggerHelper.info('✅ Database initialized!');
+	}
+
+	private _initSocket(): void {
+		socketManager.start(this._server);
+
+		loggerHelper.info('✅ Socket initialized!');
 	}
 
 	// Getters

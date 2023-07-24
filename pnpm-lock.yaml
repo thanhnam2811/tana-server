@@ -53,6 +53,9 @@ dependencies:
     redis:
         specifier: ^4.6.7
         version: 4.6.7
+    socket.io:
+        specifier: ^4.7.1
+        version: 4.7.1
     winston:
         specifier: ^3.10.0
         version: 3.10.0
@@ -415,6 +418,13 @@ packages:
             '@redis/client': 1.5.8
         dev: false
 
+    /@socket.io/component-emitter@3.1.0:
+        resolution:
+            {
+                integrity: sha512-+9jVqKhRSpsc591z5vX+X5Yyw+he/HCB4iQ/RYxw35CEPaY1gnsNE43nf9n9AaYjAQrTiI/mOwKUKdUs9vf7Xg==,
+            }
+        dev: false
+
     /@swc/core-darwin-arm64@1.3.70:
         resolution:
             {
@@ -636,6 +646,13 @@ packages:
             '@types/node': 20.4.2
         dev: true
 
+    /@types/cookie@0.4.1:
+        resolution:
+            {
+                integrity: sha512-XW/Aa8APYr6jSVVA1y/DEIZX0/GMKLEVekNG727R8cs56ahETkRAy/3DR7+fJyh7oUgGwNQaRfXCun0+KbWY7Q==,
+            }
+        dev: false
+
     /@types/cors@2.8.13:
         resolution:
             {
@@ -643,7 +660,6 @@ packages:
             }
         dependencies:
             '@types/node': 20.4.2
-        dev: true
 
     /@types/express-handlebars@5.3.1:
         resolution:
@@ -1171,6 +1187,14 @@ packages:
                 integrity: sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==,
             }
 
+    /base64id@2.0.0:
+        resolution:
+            {
+                integrity: sha512-lGe34o6EHj9y3Kts9R4ZYs/Gr+6N7MCaMlIFA3F1R2O5/m7K06AxfSeO5530PEERE6/WyEg3lsuyw4GHlPZHog==,
+            }
+        engines: { node: ^4.5.0 || >= 5.9 }
+        dev: false
+
     /basic-auth@2.0.1:
         resolution:
             {
@@ -1521,6 +1545,14 @@ packages:
             }
         dev: false
 
+    /cookie@0.4.2:
+        resolution:
+            {
+                integrity: sha512-aSWTXFzaKWkvHO1Ny/s+ePFpvKsPnjc551iI41v3ny/ow6tBG5Vd+FuqGNhh1LxOmVzOlGUriIlOaokOvhaStA==,
+            }
+        engines: { node: '>= 0.6' }
+        dev: false
+
     /cookie@0.5.0:
         resolution:
             {
@@ -1735,6 +1767,37 @@ packages:
         dependencies:
             once: 1.4.0
         dev: true
+
+    /engine.io-parser@5.1.0:
+        resolution:
+            {
+                integrity: sha512-enySgNiK5tyZFynt3z7iqBR+Bto9EVVVvDFuTT0ioHCGbzirZVGDGiQjZzEp8hWl6hd5FSVytJGuScX1C1C35w==,
+            }
+        engines: { node: '>=10.0.0' }
+        dev: false
+
+    /engine.io@6.5.1:
+        resolution:
+            {
+                integrity: sha512-mGqhI+D7YxS9KJMppR6Iuo37Ed3abhU8NdfgSvJSDUafQutrN+sPTncJYTyM9+tkhSmWodKtVYGPPHyXJEwEQA==,
+            }
+        engines: { node: '>=10.0.0' }
+        dependencies:
+            '@types/cookie': 0.4.1
+            '@types/cors': 2.8.13
+            '@types/node': 20.4.2
+            accepts: 1.3.8
+            base64id: 2.0.0
+            cookie: 0.4.2
+            cors: 2.8.5
+            debug: 4.3.4
+            engine.io-parser: 5.1.0
+            ws: 8.11.0
+        transitivePeerDependencies:
+            - bufferutil
+            - supports-color
+            - utf-8-validate
+        dev: false
 
     /envalid@7.3.1:
         resolution:
@@ -3829,6 +3892,51 @@ packages:
         engines: { node: '>= 6.0.0', npm: '>= 3.0.0' }
         dev: false
 
+    /socket.io-adapter@2.5.2:
+        resolution:
+            {
+                integrity: sha512-87C3LO/NOMc+eMcpcxUBebGjkpMDkNBS9tf7KJqcDsmL936EChtVva71Dw2q4tQcuVC+hAUy4an2NO/sYXmwRA==,
+            }
+        dependencies:
+            ws: 8.11.0
+        transitivePeerDependencies:
+            - bufferutil
+            - utf-8-validate
+        dev: false
+
+    /socket.io-parser@4.2.4:
+        resolution:
+            {
+                integrity: sha512-/GbIKmo8ioc+NIWIhwdecY0ge+qVBSMdgxGygevmdHj24bsfgtCmcUUcQ5ZzcylGFHsN3k4HB4Cgkl96KVnuew==,
+            }
+        engines: { node: '>=10.0.0' }
+        dependencies:
+            '@socket.io/component-emitter': 3.1.0
+            debug: 4.3.4
+        transitivePeerDependencies:
+            - supports-color
+        dev: false
+
+    /socket.io@4.7.1:
+        resolution:
+            {
+                integrity: sha512-W+utHys2w//dhFjy7iQQu9sGd3eokCjGbl2r59tyLqNiJJBdIebn3GAKEXBr3osqHTObJi2die/25bCx2zsaaw==,
+            }
+        engines: { node: '>=10.0.0' }
+        dependencies:
+            accepts: 1.3.8
+            base64id: 2.0.0
+            cors: 2.8.5
+            debug: 4.3.4
+            engine.io: 6.5.1
+            socket.io-adapter: 2.5.2
+            socket.io-parser: 4.2.4
+        transitivePeerDependencies:
+            - bufferutil
+            - supports-color
+            - utf-8-validate
+        dev: false
+
     /socks@2.7.1:
         resolution:
             {
@@ -4390,6 +4498,22 @@ packages:
             {
                 integrity: sha512-l4Sp/DRseor9wL6EvV2+TuQn63dMkPjZ/sp9XkghTEbV9KlPS1xUsZ3u7/IQO4wxtcFB4bgpQPRcR3QCvezPcQ==,
             }
+
+    /ws@8.11.0:
+        resolution:
+            {
+                integrity: sha512-HPG3wQd9sNQoT9xHyNCXoDUa+Xw/VevmY9FoHyQ+g+rrMn4j6FB4np7Z0OhdTgjx6MgQLK7jwSy1YecU1+4Asg==,
+            }
+        engines: { node: '>=10.0.0' }
+        peerDependencies:
+            bufferutil: ^4.0.1
+            utf-8-validate: ^5.0.2
+        peerDependenciesMeta:
+            bufferutil:
+                optional: true
+            utf-8-validate:
+                optional: true
+        dev: false
 
     /yallist@4.0.0:
         resolution:
