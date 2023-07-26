@@ -33,17 +33,18 @@ const randomHelper = {
 			numbers: true,
 		};
 
-		let characters = '';
+		const charactersArr = [];
 		if (options?.upperCase) {
-			characters += UPPER_CASE_LETTERS;
+			charactersArr.push(UPPER_CASE_LETTERS);
 		}
 		if (options?.lowerCase) {
-			characters += LOWER_CASE_LETTERS;
+			charactersArr.push(LOWER_CASE_LETTERS);
 		}
 		if (options?.numbers) {
-			characters += NUMBERS;
+			charactersArr.push(NUMBERS);
 		}
 
+		const characters = charactersArr.join('');
 		if (!characters) {
 			throw new Error('No characters to generate random string!');
 		}

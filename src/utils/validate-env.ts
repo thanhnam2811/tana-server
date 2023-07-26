@@ -1,5 +1,5 @@
 import { EnvEnum } from '@configs/app-config';
-import { cleanEnv, str, port, bool } from 'envalid';
+import { cleanEnv, str, port, bool, num } from 'envalid';
 
 const validateEnv = () => {
 	cleanEnv(process.env, {
@@ -39,6 +39,9 @@ const validateEnv = () => {
 		MONGO_NAME: str({
 			desc: 'The name of the database to connect to',
 		}),
+		MONGO_MAX_CONN_PER_CORE: num({
+			desc: 'The maximum number of connections per core',
+		}),
 
 		// Redis config
 		REDIS_HOST: str({
@@ -72,6 +75,9 @@ const validateEnv = () => {
 		}),
 		MAIL_NAME: str({
 			desc: 'The name to send emails from',
+		}),
+		MAIL_HELP: str({
+			desc: 'The email address to send help emails to',
 		}),
 	});
 };

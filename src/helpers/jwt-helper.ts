@@ -1,6 +1,12 @@
 import authConfig from '@configs/auth-config';
 import jwt from 'jsonwebtoken';
 
+export interface ITokenPayload {
+	_id: string;
+	name: string;
+	email: string;
+}
+
 export class JwtHelper {
 	// Singleton
 	private static _instance: JwtHelper;
@@ -22,25 +28,27 @@ export class JwtHelper {
 		this._secret = authConfig.JWT_SECRET;
 		this._atExpiresIn = authConfig.AT_EXPIRES_IN;
 		this._rtExpiresIn = authConfig.RT_EXPIRES_IN;
+
+		console.log('JwtHelper initialized', authConfig);
 	}
 
 	// Methods
-	public generateAccessToken(payload: object): string {
+	public generateAccessToken(payload: ITokenPayload): string {
 		return jwt.sign(payload, this._secret, { expiresIn: this._atExpiresIn });
 	}
 
-	public generateRefreshToken(payload: object): string {
+	public generateRefreshToken(payload: ITokenPayload): string {
 		return jwt.sign(payload, this._secret, { expiresIn: this._rtExpiresIn });
 	}
 
-	public decodeToken(token: string): Promise<unknown> {
+	public decodeToken(token: string): Promise<ITokenPayload> {
 		return new Promise((resolve, reject) => {
 			jwt.verify(token, this._secret, (err, decoded) => {
 				if (err) {
 					return reject(err);
 				}
 
-				return resolve(decoded);
+				return resolve(decoded as ITokenPayload);
 			});
 		});
 	}

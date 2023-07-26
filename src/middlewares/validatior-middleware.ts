@@ -14,7 +14,7 @@ const validatorMiddleware =
 	(
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		type: any,
-		{ skipMissingProperties = false, whitelist = true, forbidNonWhitelisted = true }: IValidatorOptions = {},
+		{ skipMissingProperties = false, whitelist = true, forbidNonWhitelisted = false }: IValidatorOptions = {},
 	): RequestHandler =>
 	(req, res, next) => {
 		const dto = plainToInstance(type, req.body);
@@ -50,7 +50,7 @@ const flattenErrors = (errors: ValidationError[], parentKey = ''): ValidationErr
 
 	errors.forEach((error: ValidationError) => {
 		const property = parentKey ? `${parentKey}.${error.property}` : error.property;
-		if (error.children.length > 0) {
+		if (error.children?.length) {
 			result.push(...flattenErrors(error.children, property));
 		} else {
 			result.push({ ...error, property });

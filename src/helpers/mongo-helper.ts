@@ -7,11 +7,14 @@ const mongoHelper = {
 	 * @param fields fields to hide
 	 */
 	hideFields: (schema: Schema, fields: string[]) => {
-		schema.set('toJSON', {
+		const hideFieldTransform = {
 			transform: (_, ret) => {
 				fields.forEach((field) => delete ret[field]);
 			},
-		});
+		};
+
+		schema.set('toJSON', hideFieldTransform);
+		schema.set('toObject', hideFieldTransform);
 	},
 };
 

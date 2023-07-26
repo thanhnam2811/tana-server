@@ -4,5 +4,4 @@ export default interface IUser {
 	password: string;
 
 	refreshToken: string;
-	isVerified: boolean;
 }

@@ -4,9 +4,33 @@ import validatorMiddleware from '@middlewares/validatior-middleware';
 import sendRegisterOtpHandler, { SendRegisterOtpDto } from './handlers/send-register-otp';
 
 const authController: IController = {
-	sendRegisterOtp: [validatorMiddleware(SendRegisterOtpDto), sendRegisterOtpHandler],
+	sendRegisterOtp: {
+		method: 'post',
+		path: '/send-register-otp',
+		middlewares: [validatorMiddleware(SendRegisterOtpDto)],
+		handler: async (req, res, next) => {
+			try {
+				const dto: SendRegisterOtpDto = req.body;
+				return await sendRegisterOtpHandler(dto, res);
+			} catch (error) {
+				next(error);
+			}
+		},
+	},
 
-	register: [validatorMiddleware(RegisterDto), registerHandler],
+	register: {
+		method: 'post',
+		path: '/register',
+		middlewares: [validatorMiddleware(RegisterDto)],
+		handler: async (req, res, next) => {
+			try {
+				const dto: RegisterDto = req.body;
+				return await registerHandler(dto, res);
+			} catch (error) {
+				next(error);
+			}
+		},
+	},
 };
 
 export default authController;

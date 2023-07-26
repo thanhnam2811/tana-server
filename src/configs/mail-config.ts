@@ -8,6 +8,7 @@ const mailConfig = {
 	SECURE: process.env.MAIL_SECURE !== 'false',
 	FROM: process.env.MAIL_FROM,
 	NAME: process.env.MAIL_NAME,
+	HELP: process.env.MAIL_HELP,
 };
 
 export default mailConfig;

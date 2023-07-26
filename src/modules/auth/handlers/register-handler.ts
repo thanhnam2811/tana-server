@@ -1,12 +1,13 @@
 import { HttpException } from '@exceptions/http-exception';
 import loggerHelper from '@helpers/logger-helper';
+import { IHandler } from '@interfaces/controller-interface';
 import UserModel from '@modules/user/user-model';
 import { IsEmail, IsNotEmpty, IsString, IsStrongPassword, Length } from 'class-validator';
-import { RequestHandler } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import otpHelper, { OtpTypeEnums } from '../helpers/otp-helper';
 import passwordHelper from '../helpers/password-helper';
 import sendWelcomeMail from '../utils/send-welcome-mail';
+import jwtHelper, { ITokenPayload } from '@helpers/jwt-helper';
 
 export class RegisterDto {
 	@IsNotEmpty({ message: 'Tên không được để trống!' })
@@ -37,46 +38,51 @@ export class RegisterDto {
 	otp: string;
 }
 
-const registerHandler: RequestHandler = async (req, res, next) => {
-	try {
-		const registerDto: RegisterDto = req.body;
-
-		// Check if email is already registered
-		const existed = await UserModel.findOne({ email: registerDto.email }).exec();
-		if (existed) {
-			throw new HttpException(StatusCodes.CONFLICT, 'Email đã được đăng ký! Vui lòng sử dụng email khác!');
-		}
-
-		// Check OTP
-		const otp = await otpHelper.getOtp(registerDto.email, OtpTypeEnums.REGISTER);
-		if (!otp) {
-			throw new HttpException(StatusCodes.BAD_REQUEST, 'Mã OTP không tồn tại hoặc đã hết hạn!');
-		}
-
-		if (otp !== registerDto.otp) {
-			throw new HttpException(StatusCodes.BAD_REQUEST, 'Mã OTP không đúng!');
-		}
-
-		// Hash password
-		const hashedPassword = await passwordHelper.hash(registerDto.password);
-		registerDto.password = hashedPassword;
-
-		// Create user
-		const user = await UserModel.create(registerDto);
-
-		// Log
-		loggerHelper.info(`User ${user.email} registered! ID: ${user._id}`);
-
-		// Send welcome email
-		sendWelcomeMail(user.email, user.name);
-
-		// Response
-		res.status(StatusCodes.CREATED).json({
-			message: 'Đăng ký thành công! Vui lòng kiểm tra email để xác thực tài khoản!',
-		});
-	} catch (error) {
-		next(error);
+const registerHandler: IHandler<RegisterDto> = async (dto, res) => {
+	// Check if email is already registered
+	const existed = await UserModel.findOne({ email: dto.email }).exec();
+	if (existed) {
+		throw new HttpException(StatusCodes.CONFLICT, 'Email đã được đăng ký! Vui lòng sử dụng email khác!');
 	}
+
+	// Check OTP
+	const otp = await otpHelper.getOtp(dto.email, OtpTypeEnums.REGISTER);
+	if (!otp) {
+		throw new HttpException(StatusCodes.BAD_REQUEST, 'Mã OTP không tồn tại hoặc đã hết hạn!');
+	}
+
+	if (otp !== dto.otp) {
+		throw new HttpException(StatusCodes.BAD_REQUEST, 'Mã OTP không đúng!');
+	}
+
+	// Hash password
+	const hashedPassword = await passwordHelper.hash(dto.password);
+	dto.password = hashedPassword;
+
+	// Create user
+	const user = await UserModel.create(dto);
+
+	// Log
+	loggerHelper.info(`🙋‍♂️ User "${user.email}" registered! ID: ${user._id}`);
+
+	const payload: ITokenPayload = {
+		_id: user._id.toString(),
+		name: user.name,
+		email: user.email,
+	};
+
+	const accessToken = jwtHelper.generateAccessToken(payload);
+	const refreshToken = jwtHelper.generateRefreshToken(payload);
+
+	// Send welcome email
+	sendWelcomeMail(user.email, user.name);
+
+	// Response
+	res.status(StatusCodes.CREATED).json({
+		message: 'Đăng ký thành công!',
+		accessToken,
+		refreshToken,
+	});
 };
 
 export default registerHandler;

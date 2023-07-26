@@ -1,11 +1,7 @@
 import loggerHelper from '@helpers/logger-helper';
-import authRouter from '@modules/auth/auth-router';
-import { Application, RequestHandler, Router } from 'express';
-
-type Route = {
-	router: Router;
-	middlewares: RequestHandler[];
-};
+import IController from '@interfaces/controller-interface';
+import authController from '@modules/auth/auth-controller';
+import { Application, Router } from 'express';
 
 export class RouterManager {
 	// Singleton
@@ -19,30 +15,42 @@ export class RouterManager {
 	}
 
 	// Properties
-	private _routes: Map<string, Route> = new Map();
+	private _routes: Map<string, IController> = new Map();
 
 	// Constructor
 	private constructor() {
 		// Register routes
-		this._registerRoute('/auth', authRouter);
+		this._registerRoute('/auth', authController);
 	}
 
 	// Methods
-	private _registerRoute(path: string, router: Router, middlewares: RequestHandler[] = []): void {
+	private _registerRoute(path: string, controller: IController): void {
 		if (this._routes.has(path)) {
 			loggerHelper.warn(`Route ${path} already exists!`);
 			return;
 		}
 
-		this._routes.set(path, { router, middlewares });
+		this._routes.set(path, controller);
 	}
 
 	public initRoutes(app: Application): void {
 		for (const [path, route] of this._routes) {
-			const { router, middlewares } = route;
+			const router = this._createRouter(route);
 
-			app.use(path, ...middlewares, router);
+			app.use(path, router);
 		}
+	}
+
+	private _createRouter(controller: IController): Router {
+		const router = Router();
+
+		for (const key in controller) {
+			const { method, path, middlewares, handler } = controller[key];
+
+			router[method](path, ...middlewares, handler);
+		}
+
+		return router;
 	}
 }
 

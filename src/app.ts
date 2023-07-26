@@ -11,6 +11,7 @@ import mongoDB from '@databases/mongo-db';
 import redisDB from '@databases/redis-db';
 import http from 'http';
 import socketManager from '@managers/socket-manager';
+import { StatusCodes } from 'http-status-codes';
 
 export class App {
 	// Singleton
@@ -38,23 +39,19 @@ export class App {
 
 	// Methods
 	public async start(): Promise<void> {
-		const line = ''.padStart(50, '=');
-
 		loggerHelper.info('⏳ Starting server...');
 
-		loggerHelper.info(line);
+		loggerHelper.line();
 
-		this._init();
+		await this._init();
 
-		loggerHelper.info(line);
+		loggerHelper.line();
 
 		this._server.listen(this._PORT, () => {
 			loggerHelper.info(`🌐 Environment: ${this._ENV}`);
 			loggerHelper.info(`🚀 Server started on port ${this._PORT}!`);
-			loggerHelper.info(line);
+			loggerHelper.line();
 		});
-
-		loggerHelper.info(line);
 	}
 
 	private async _init() {
@@ -85,7 +82,7 @@ export class App {
 
 	private _initRoutes(): void {
 		this._app.get('/', (req, res) => {
-			res.send('Hello world! From TANA with love!');
+			res.status(StatusCodes.OK).send('Hello world! From TANA with love!');
 		});
 
 		routerManager.initRoutes(this._app);

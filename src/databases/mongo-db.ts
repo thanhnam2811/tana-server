@@ -62,14 +62,14 @@ export class MongoDB {
 
 		const memUsage = formatBytes(process.memoryUsage().rss);
 
-		loggerHelper.info(`🔗 Connections: ${numConn}/${maxConn} - 📊 Memory usage: ${memUsage}`);
+		loggerHelper.info(`[MongoDB] 🔗 Connections: ${numConn}/${maxConn} - 📊 Memory usage: ${memUsage}`);
 		if (numConn >= maxConn) {
 			this._overloadHandler();
 		}
 	}
 
 	private _overloadHandler() {
-		loggerHelper.warn('🔥 MongoDB is overloaded!');
+		loggerHelper.warn('[MongoDB] 🔥 Overloaded!');
 	}
 }
 

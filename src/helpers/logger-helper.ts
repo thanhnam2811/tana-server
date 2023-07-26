@@ -37,5 +37,15 @@ export const createLogger = (level?: string) => {
 	});
 };
 
-const loggerHelper = createLogger();
+interface LoggerHelper extends winston.Logger {
+	line: () => void;
+}
+
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-ignore
+const loggerHelper: LoggerHelper = createLogger();
+loggerHelper.line = (length = 50, char = '=') => {
+	loggerHelper.info(char.repeat(length));
+};
+
 export default loggerHelper;

@@ -2,27 +2,28 @@ import { Schema, model } from 'mongoose';
 import IUser from './user-interface';
 import mongoHelper from '@helpers/mongo-helper';
 
-const userSchema = new Schema<IUser>({
-	name: {
-		type: String,
-		required: true,
+const userSchema = new Schema<IUser>(
+	{
+		name: {
+			type: String,
+			required: true,
+		},
+		email: {
+			type: String,
+			required: true,
+			unique: true,
+		},
+		password: {
+			type: String,
+		},
+		refreshToken: {
+			type: String,
+		},
 	},
-	email: {
-		type: String,
-		required: true,
-		unique: true,
+	{
+		timestamps: true,
 	},
-	password: {
-		type: String,
-	},
-	refreshToken: {
-		type: String,
-	},
-	isVerified: {
-		type: Boolean,
-		default: false,
-	},
-});
+);
 
 mongoHelper.hideFields(userSchema, ['password', 'refreshToken']);
 
