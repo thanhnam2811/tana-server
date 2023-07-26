@@ -24,7 +24,11 @@ const errorHandlerMiddleware = (e: HttpException, req: Request, res: Response, n
 		const { statusCode, message } = eResponse;
 
 		loggerHelper.error(`[${req.method}] ${req.path} >> StatusCode:: ${statusCode}, Message:: ${message}`);
-		loggerHelper.error(e.stack);
+
+		// Log error stack if status code is 500 (Internal Server Error)
+		if (statusCode === 500) {
+			loggerHelper.error(e.stack);
+		}
 
 		res.status(statusCode).json(eResponse);
 	} catch (error) {
