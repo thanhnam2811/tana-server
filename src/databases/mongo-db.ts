@@ -19,7 +19,7 @@ export class MongoDB {
 	// Properties
 	private _connectionString: string;
 	private _logUsageInterval: NodeJS.Timeout;
-	private _logUsageIntervalTime: number = 1000 * 10; // 10s
+	private _logUsageIntervalTime: number = 1000 * 60 * 5; // 10s
 
 	// Constructor
 	private constructor() {
