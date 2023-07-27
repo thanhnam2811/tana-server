@@ -28,8 +28,6 @@ export class JwtHelper {
 		this._secret = authConfig.JWT_SECRET;
 		this._atExpiresIn = authConfig.AT_EXPIRES_IN;
 		this._rtExpiresIn = authConfig.RT_EXPIRES_IN;
-
-		console.log('JwtHelper initialized', authConfig);
 	}
 
 	// Methods
