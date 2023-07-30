@@ -1,8 +1,8 @@
-const UPPER_CASE_LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-const LOWER_CASE_LETTERS = 'abcdefghijklmnopqrstuvwxyz';
+const UPPERCASELETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+const LOWERCASELETTERS = 'abcdefghijklmnopqrstuvwxyz';
 const NUMBERS = '0123456789';
 
-const randomHelper = {
+const randomUtil = {
 	/**
 	 * Get random int between min and max
 	 * @param min min value
@@ -35,10 +35,10 @@ const randomHelper = {
 
 		const charactersArr = [];
 		if (options?.upperCase) {
-			charactersArr.push(UPPER_CASE_LETTERS);
+			charactersArr.push(UPPERCASELETTERS);
 		}
 		if (options?.lowerCase) {
-			charactersArr.push(LOWER_CASE_LETTERS);
+			charactersArr.push(LOWERCASELETTERS);
 		}
 		if (options?.numbers) {
 			charactersArr.push(NUMBERS);
@@ -53,7 +53,7 @@ const randomHelper = {
 		let result = '',
 			index = 0;
 		for (let i = 0; i < length; i++) {
-			index = randomHelper.getRandomInt(0, charactersLength - 1);
+			index = randomUtil.getRandomInt(0, charactersLength - 1);
 			result += characters.charAt(index);
 		}
 
@@ -61,4 +61,4 @@ const randomHelper = {
 	},
 };
 
-export default randomHelper;
+export default randomUtil;

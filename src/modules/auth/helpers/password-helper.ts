@@ -3,48 +3,47 @@ import bcrypt from 'bcrypt';
 
 export class PasswordHelper {
 	// Singleton
-	private static _instance: PasswordHelper;
-	public static get instance(): PasswordHelper {
-		if (!PasswordHelper._instance) {
-			PasswordHelper._instance = new PasswordHelper();
+	private static instance: PasswordHelper;
+	public static getInstance(): PasswordHelper {
+		if (!PasswordHelper.instance) {
+			PasswordHelper.instance = new PasswordHelper();
 		}
 
-		return PasswordHelper._instance;
+		return PasswordHelper.instance;
 	}
 
 	// Properties
-	private _saltRounds: number;
-	private _additionalStr: string;
+	private saltRounds: number;
+	private additionalStr: string;
 
 	// Constructor
 	private constructor() {
-		this._saltRounds = authConfig.PASS_SALT;
-		this._additionalStr = authConfig.PASS_EXT;
+		this.saltRounds = authConfig.PASS_SALT;
+		this.additionalStr = authConfig.PASS_EXT;
 	}
 
-	private _prepare(plain: string): string {
+	private prepare(plain: string): string {
 		// Add additional string to password
-		const password = plain + this._additionalStr;
+		const password = plain + this.additionalStr;
 
 		return password;
 	}
 
 	// Methods
 	public async hash(plain: string): Promise<string> {
-		const password = this._prepare(plain);
+		const password = this.prepare(plain);
 
 		// Hash password
-		const salt = await bcrypt.genSalt(this._saltRounds);
+		const salt = await bcrypt.genSalt(this.saltRounds);
 
 		return bcrypt.hash(password, salt);
 	}
 
 	public compare(plain: string, hash: string): Promise<boolean> {
-		const password = this._prepare(plain);
+		const password = this.prepare(plain);
 
 		return bcrypt.compare(password, hash);
 	}
 }
 
-const passwordHelper = PasswordHelper.instance;
-export default passwordHelper;
+export const passwordHelper = PasswordHelper.getInstance();

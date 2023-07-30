@@ -1,13 +1,13 @@
 import { HttpException } from '@exceptions/http-exception';
-import loggerHelper from '@helpers/logger-helper';
+import logUtil from '@utils/log-util';
 import { IHandler } from '@interfaces/controller-interface';
 import UserModel from '@modules/user/user-model';
 import { IsEmail, IsNotEmpty, IsString, IsStrongPassword, Length } from 'class-validator';
 import { StatusCodes } from 'http-status-codes';
-import otpHelper, { OtpTypeEnums } from '../helpers/otp-helper';
-import passwordHelper from '../helpers/password-helper';
-import { TokenHelper } from '../helpers/token-helper';
-import sendWelcomeMail from '../utils/send-welcome-mail';
+import otpUtil, { OtpTypeEnums } from '../utils/otp-util';
+import { passwordHelper } from '../helpers/password-helper';
+import sendWelcomeMail from '../mails/send-welcome-mail';
+import { JwtHelper } from '@helpers/jwt-helper';
 
 export class RegisterDto {
 	@IsNotEmpty({ message: 'Tên không được để trống!' })
@@ -46,7 +46,7 @@ const registerHandler: IHandler<RegisterDto> = async (dto, res) => {
 	}
 
 	// Check OTP
-	const otp = await otpHelper.getOtp(dto.email, OtpTypeEnums.REGISTER);
+	const otp = await otpUtil.getOtp(dto.email, OtpTypeEnums.REGISTER);
 	if (!otp) {
 		throw new HttpException(StatusCodes.BAD_REQUEST, 'Mã OTP không tồn tại hoặc đã hết hạn!');
 	}
@@ -68,12 +68,12 @@ const registerHandler: IHandler<RegisterDto> = async (dto, res) => {
 	});
 
 	// Log
-	loggerHelper.info(`🙋‍♂️ User "${dto.email}" registered! ID: ${user._id}`);
+	logUtil.info(`🙋‍♂️ User "${dto.email}" registered! ID: ${user.id}`);
 
 	// Token
-	const tokenHelper = new TokenHelper(user);
+	const jwtHelper = new JwtHelper(user);
 
-	const { accessToken, refreshToken } = tokenHelper.getToken();
+	const { accessToken, refreshToken } = jwtHelper.generateToken();
 
 	// Send welcome email
 	sendWelcomeMail(user.email.value, user.name);

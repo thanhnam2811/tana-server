@@ -1,4 +1,4 @@
-import mailHelper from '@helpers/mail-helper';
+import { mailHelper } from '@helpers/mail-helper';
 
 const sendRegisterMail = async (email: string, otpStr: string): Promise<void> => {
 	const subject = 'Xác thực tài khoản';

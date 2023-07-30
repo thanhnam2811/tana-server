@@ -1,5 +1,5 @@
 import appConfig, { EnvEnum } from '@configs/app-config';
-import loggerHelper from '@helpers/logger-helper';
+import logUtil from '@utils/log-util';
 import express, { Application } from 'express';
 import compression from 'compression';
 import helmet from 'helmet';
@@ -15,105 +15,105 @@ import { StatusCodes } from 'http-status-codes';
 
 export class App {
 	// Singleton
-	private static _instance: App;
-	public static get instance(): App {
-		if (!App._instance) {
-			App._instance = new App();
+	private static instance: App;
+	public static getInstance(): App {
+		if (!App.instance) {
+			App.instance = new App();
 		}
-		return App._instance;
+		return App.instance;
 	}
 
 	// Properties
-	private _PORT: number;
-	private _ENV: EnvEnum;
-	private _app: Application;
-	private _server: http.Server;
+	private PORT: number;
+	private ENV: EnvEnum;
+	private app: Application;
+	private server: http.Server;
 
 	// Constructor
 	private constructor() {
-		this._PORT = appConfig.PORT;
-		this._ENV = appConfig.ENV;
-		this._app = express();
-		this._server = http.createServer(this._app);
+		this.PORT = appConfig.PORT;
+		this.ENV = appConfig.ENV;
+		this.app = express();
+		this.server = http.createServer(this.app);
 	}
 
 	// Methods
 	public async start(): Promise<void> {
-		loggerHelper.info('⏳ Starting server...');
+		logUtil.info('⏳ Starting server...');
 
-		loggerHelper.line();
+		logUtil.line();
 
-		await this._init();
+		await this.init();
 
-		loggerHelper.line();
+		logUtil.line();
 
-		this._server.listen(this._PORT, () => {
-			loggerHelper.info(`🌐 Environment: ${this._ENV}`);
-			loggerHelper.info(`🚀 Server started on port ${this._PORT}!`);
-			loggerHelper.line();
+		this.server.listen(this.PORT, () => {
+			logUtil.info(`🌐 Environment: ${this.ENV}`);
+			logUtil.info(`🚀 Server started on port ${this.PORT}!`);
+			logUtil.line();
 		});
 	}
 
-	private async _init() {
-		this._initExpress();
-		this._initMiddlewares();
-		this._initRoutes();
-		this._initErrorHandlers();
-		await this._initDatabase();
-		this._initSocket();
+	private async init() {
+		this.initExpress();
+		this.initMiddlewares();
+		this.initRoutes();
+		this.initErrorHandlers();
+		await this.initDatabase();
+		this.initSocket();
 	}
 
-	private _initExpress(): void {
-		this._app.use(express.json());
-		this._app.use(express.urlencoded({ extended: true }));
+	private initExpress(): void {
+		this.app.use(express.json());
+		this.app.use(express.urlencoded({ extended: true }));
 
-		this._app.use(compression());
-		this._app.use(helmet());
-		this._app.use(cors({ origin: '*' }));
+		this.app.use(compression());
+		this.app.use(helmet());
+		this.app.use(cors({ origin: '*' }));
 
-		loggerHelper.info('✅ Express initialized!');
+		logUtil.info('✅ Express initialized!');
 	}
 
-	private _initMiddlewares(): void {
-		this._app.use(loggerMiddleware);
+	private initMiddlewares(): void {
+		this.app.use(loggerMiddleware);
 
-		loggerHelper.info('✅ Middlewares initialized!');
+		logUtil.info('✅ Middlewares initialized!');
 	}
 
-	private _initRoutes(): void {
-		this._app.get('/', (req, res) => {
+	private initRoutes(): void {
+		this.app.get('/', (req, res) => {
 			res.status(StatusCodes.OK).json({ message: 'Hello world! From TANA with love!' });
 		});
 
-		routerManager.initRoutes(this._app);
+		routerManager.initRoutes(this.app);
 
-		loggerHelper.info('✅ Routes initialized!');
+		logUtil.info('✅ Routes initialized!');
 	}
 
-	private _initErrorHandlers(): void {
-		this._app.use(errorHandlerMiddleware);
+	private initErrorHandlers(): void {
+		this.app.use(errorHandlerMiddleware);
 
-		loggerHelper.info('✅ Error handlers initialized!');
+		logUtil.info('✅ Error handlers initialized!');
 	}
 
-	private async _initDatabase(): Promise<void> {
+	private async initDatabase(): Promise<void> {
 		await mongoDB.connect();
 		await redisDB.connect();
 
-		loggerHelper.info('✅ Database initialized!');
+		logUtil.info('✅ Database initialized!');
 	}
 
-	private _initSocket(): void {
-		socketManager.start(this._server);
+	private initSocket(): void {
+		socketManager.start(this.server);
 
-		loggerHelper.info('✅ Socket initialized!');
+		logUtil.info('✅ Socket initialized!');
 	}
 
 	// Getters
-	public get PORT(): number {
-		return this._PORT;
+	public getPORT(): number {
+		return this.PORT;
 	}
 }
 
-const app = App.instance;
+const app = App.getInstance();
 export default app;

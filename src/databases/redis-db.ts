@@ -1,26 +1,26 @@
 import redisConfig from '@configs/redis-config';
-import loggerHelper from '@helpers/logger-helper';
+import logUtil from '@utils/log-util';
 import { createClient, RedisClientType } from 'redis';
 
 export class RedisDB {
 	// Singleton
-	private static _instance: RedisDB;
-	public static get instance(): RedisDB {
-		if (!RedisDB._instance) {
-			RedisDB._instance = new RedisDB();
+	private static instance: RedisDB;
+	public static getInstance(): RedisDB {
+		if (!RedisDB.instance) {
+			RedisDB.instance = new RedisDB();
 		}
 
-		return RedisDB._instance;
+		return RedisDB.instance;
 	}
 
 	// Properties
-	private _client: RedisClientType;
+	private client: RedisClientType;
 
 	// Constructor
 	private constructor() {
 		const { HOST, PORT, PASS } = redisConfig;
 
-		this._client = createClient({
+		this.client = createClient({
 			socket: {
 				port: PORT,
 				host: HOST,
@@ -31,23 +31,23 @@ export class RedisDB {
 
 	// Methods
 	public async connect() {
-		await this._client.connect();
+		await this.client.connect();
 
-		loggerHelper.info('✅ RedisDB connected!');
+		logUtil.info('✅ RedisDB connected!');
 	}
 
 	public async disconnect() {
-		await this._client.disconnect();
+		await this.client.disconnect();
 
-		loggerHelper.info('❌ RedisDB disconnected!');
+		logUtil.info('❌ RedisDB disconnected!');
 	}
 
-	public get client() {
-		return this._client;
+	public getClient() {
+		return this.client;
 	}
 }
 
-const redisDB = RedisDB.instance;
+const redisDB = RedisDB.getInstance();
 export default redisDB;
 
-export const redisClient = redisDB.client;
+export const redisClient = redisDB.getClient();

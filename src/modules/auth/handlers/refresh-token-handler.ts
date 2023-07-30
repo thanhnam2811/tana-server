@@ -1,10 +1,9 @@
 import { IHandler } from '@interfaces/controller-interface';
 import { IsNotEmpty, IsString } from 'class-validator';
 import { StatusCodes } from 'http-status-codes';
-import { TokenHelper } from '../helpers/token-helper';
 import { HttpException } from '@exceptions/http-exception';
-import jwtHelper, { ITokenPayload } from '@helpers/jwt-helper';
 import UserModel from '@modules/user/user-model';
+import { ITokenPayload, JwtHelper } from '@helpers/jwt-helper';
 
 export class RefreshTokenDto {
 	@IsNotEmpty({ message: 'Refresh token không được để trống!' })
@@ -17,13 +16,13 @@ const refreshTokenHandler: IHandler<RefreshTokenDto> = async (dto, res) => {
 
 	let payload: ITokenPayload = null;
 	try {
-		payload = await jwtHelper.decodeToken(refreshToken);
+		payload = await JwtHelper.decodeToken(refreshToken);
 	} catch (err) {
 		throw new HttpException(StatusCodes.UNAUTHORIZED, 'Refresh token không hợp lệ hoặc đã hết hạn!');
 	}
 
 	const userId = payload._id;
-	const existed = await TokenHelper.isExist(userId, refreshToken);
+	const existed = await JwtHelper.isRFTokenExist(userId, refreshToken);
 
 	// Check if refresh token is exist
 	if (!existed) {
@@ -38,8 +37,8 @@ const refreshTokenHandler: IHandler<RefreshTokenDto> = async (dto, res) => {
 	}
 
 	// Generate new token
-	const tokenHelper = new TokenHelper(user);
-	const accessToken = tokenHelper.getAccessToken();
+	const jwtHelper = new JwtHelper(user);
+	const accessToken = jwtHelper.generateAccessToken();
 
 	// Response
 	res.status(StatusCodes.OK).json({

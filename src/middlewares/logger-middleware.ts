@@ -1,4 +1,4 @@
-import { createLogger } from '@helpers/logger-helper';
+import { createLogger } from '@utils/log-util';
 import morgan from 'morgan';
 
 const logger = createLogger('http');

@@ -1,4 +1,4 @@
-import mongoHelper from '@helpers/mongo-helper';
+import { MongoHelper } from '@helpers/mongo-helper';
 import { PrivacyEnum, schemaPrivacyFields } from '@interfaces/privacy-interface';
 import { Model, Schema, model } from 'mongoose';
 import IUser, { ContactTypeEnum, GenderEnum } from './user-interface';
@@ -109,7 +109,8 @@ const userSchema = new Schema<IUser>(
 	},
 );
 
-mongoHelper.hideFields(userSchema, ['password', 'refreshToken']);
+const mongoHelper = new MongoHelper(userSchema);
+mongoHelper.hideFields(['password', 'refreshTokens', 'loginAttempts', 'isLocked', 'lockUntil', 'lockReason']);
 
 const UserModel = model<IUser, UserModel>('User', userSchema);
 export default UserModel;

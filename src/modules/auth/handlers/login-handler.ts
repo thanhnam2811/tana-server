@@ -5,8 +5,8 @@ import UserModel from '@modules/user/user-model';
 import { IsEmail, IsNotEmpty, IsString, IsStrongPassword } from 'class-validator';
 import { StatusCodes } from 'http-status-codes';
 import { DateTime } from 'luxon';
-import passwordHelper from '../helpers/password-helper';
-import { TokenHelper } from '../helpers/token-helper';
+import { passwordHelper } from '../helpers/password-helper';
+import { JwtHelper } from '@helpers/jwt-helper';
 
 export class LoginDto {
 	@IsNotEmpty({ message: 'Email không được để trống!' })
@@ -45,9 +45,9 @@ const loginHandler: IHandler<LoginDto> = async (dto, res) => {
 	resetUser(user);
 
 	// Token
-	const tokenHelper = new TokenHelper(user);
+	const jwtHelper = new JwtHelper(user);
 
-	const { accessToken, refreshToken } = tokenHelper.getToken();
+	const { accessToken, refreshToken } = jwtHelper.generateToken();
 
 	// Response
 	res.status(StatusCodes.OK).json({

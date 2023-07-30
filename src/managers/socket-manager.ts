@@ -1,41 +1,41 @@
-import loggerHelper from '@helpers/logger-helper';
+import logUtil from '@utils/log-util';
 import { Server as SocketServer, Socket } from 'socket.io';
 import http from 'http';
 import jwtHelper from '@helpers/jwt-helper';
 
 export class SocketManager {
 	// Singleton
-	private static _instance: SocketManager;
-	public static get instance() {
-		if (!SocketManager._instance) {
-			SocketManager._instance = new SocketManager();
+	private static instance: SocketManager;
+	public static getInstance() {
+		if (!SocketManager.instance) {
+			SocketManager.instance = new SocketManager();
 		}
 
-		return SocketManager._instance;
+		return SocketManager.instance;
 	}
 
 	// Properties
-	private _io: SocketServer;
-	private _storage: Map<string, { userId?: string; socket: Socket }> = new Map(); // Map<socketId, { userId, socket }>
-	private _users: Map<string, Set<string>> = new Map(); // Map<userId, Set<socketId>>
-	private _rooms: Map<string, Set<string>> = new Map(); // Map<roomId, Set<userId>>
+	private io: SocketServer;
+	private storage: Map<string, { userId?: string; socket: Socket }> = new Map(); // Map<socketId, { userId, socket }>
+	private users: Map<string, Set<string>> = new Map(); // Map<userId, Set<socketId>>
+	private rooms: Map<string, Set<string>> = new Map(); // Map<roomId, Set<userId>>
 
 	// Constructor
 	private constructor() {}
 
 	// Methods
 	public start(server: http.Server): void {
-		this._io = new SocketServer(server);
+		this.io = new SocketServer(server);
 
-		this._io.on('connection', (socket) => this._onConnection(socket));
+		this.io.on('connection', (socket) => this.onConnection(socket));
 	}
 
 	public sendToRoom(roomId: string, event: string, data: unknown, excepts?: string[]): void {
-		const roomUserIds = this._rooms.get(roomId);
+		const roomUserIds = this.rooms.get(roomId);
 
 		// If room not found or empty
 		if (!roomUserIds) {
-			loggerHelper.warn(`Room not found: ${roomId}`);
+			logUtil.warn(`Room not found: ${roomId}`);
 			return;
 		}
 
@@ -56,15 +56,15 @@ export class SocketManager {
 	}
 
 	public sendToUser(userId: string, event: string, data: unknown): void {
-		const userSockets = this._getUserSockets(userId);
+		const userSockets = this.getUserSockets(userId);
 		for (const socket of userSockets) {
 			socket.emit(event, data);
 		}
 	}
 
-	private _getUserSockets(userId: string): Set<Socket> {
+	private getUserSockets(userId: string): Set<Socket> {
 		const userSockets = new Set<Socket>();
-		const socketIds = this._users.get(userId);
+		const socketIds = this.users.get(userId);
 
 		// If userId not found or empty
 		if (!socketIds) {
@@ -72,7 +72,7 @@ export class SocketManager {
 		}
 
 		for (const socketId of socketIds) {
-			const data = this._storage.get(socketId);
+			const data = this.storage.get(socketId);
 			if (data) {
 				data.userId = userId;
 				userSockets.add(data.socket);
@@ -82,68 +82,68 @@ export class SocketManager {
 		return userSockets;
 	}
 
-	private _onConnection(socket: Socket): void {
-		loggerHelper.info(`🔌 Socket connected: ${socket.id}`);
+	private onConnection(socket: Socket): void {
+		logUtil.info(`🔌 Socket connected: ${socket.id}`);
 
-		this._storage.set(socket.id, { socket });
+		this.storage.set(socket.id, { socket });
 
-		socket.on('login', (token: string) => this._onLogin(socket, token));
+		socket.on('login', (token: string) => this.onLogin(socket, token));
 
-		socket.on('disconnect', () => this._onDisconnect(socket));
+		socket.on('disconnect', () => this.onDisconnect(socket));
 	}
 
-	private async _onLogin(socket: Socket, token: string): Promise<void> {
+	private async onLogin(socket: Socket, token: string): Promise<void> {
 		try {
 			if (!token) {
 				throw new Error('Token not found!');
 			}
 
 			const payload = (await jwtHelper.decodeToken(token)) as {
-				_id: string;
+				id: string;
 			};
 			if (!payload) {
 				throw new Error('Empty payload!');
 			}
 
-			const userId = payload._id;
-			if (!this._users.has(userId)) {
-				this._users.set(userId, new Set()); // Create new Set for userId
+			const userId = payload.id;
+			if (!this.users.has(userId)) {
+				this.users.set(userId, new Set()); // Create new Set for userId
 			}
 
-			const userSockets = this._users.get(userId);
+			const userSockets = this.users.get(userId);
 			userSockets.add(socket.id); // Add socketId to userId
 		} catch (error) {
-			loggerHelper.error(error);
+			logUtil.error(error);
 		}
 	}
 
-	private _onDisconnect(socket: Socket): void {
-		if (!this._storage.has(socket.id)) {
+	private onDisconnect(socket: Socket): void {
+		if (!this.storage.has(socket.id)) {
 			return;
 		}
 
-		const data = this._storage.get(socket.id);
+		const data = this.storage.get(socket.id);
 		if (!data) {
 			return;
 		}
 
-		this._storage.delete(socket.id);
+		this.storage.delete(socket.id);
 
 		const { userId } = data;
 		if (!userId) {
 			return;
 		}
 
-		const userSockets = this._users.get(userId);
+		const userSockets = this.users.get(userId);
 		if (!userSockets) {
 			return;
 		}
 
 		userSockets.delete(socket.id);
 
-		loggerHelper.info(`🔌 Socket disconnected: ${socket.id}`);
+		logUtil.info(`🔌 Socket disconnected: ${socket.id}`);
 	}
 }
 
-const socketManager = SocketManager.instance;
+const socketManager = SocketManager.getInstance();
 export default socketManager;

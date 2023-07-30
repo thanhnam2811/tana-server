@@ -1,47 +1,47 @@
-import loggerHelper from '@helpers/logger-helper';
+import logUtil from '@utils/log-util';
 import IController from '@interfaces/controller-interface';
 import authController from '@modules/auth/auth-controller';
 import { Application, Router } from 'express';
 
 export class RouterManager {
 	// Singleton
-	private static _instance: RouterManager;
-	public static get instance(): RouterManager {
-		if (!RouterManager._instance) {
-			RouterManager._instance = new RouterManager();
+	private static instance: RouterManager;
+	public static getInstance(): RouterManager {
+		if (!RouterManager.instance) {
+			RouterManager.instance = new RouterManager();
 		}
 
-		return RouterManager._instance;
+		return RouterManager.instance;
 	}
 
 	// Properties
-	private _routes: Map<string, IController> = new Map();
+	private routes: Map<string, IController> = new Map();
 
 	// Constructor
 	private constructor() {
 		// Register routes
-		this._registerRoute('/auth', authController);
+		this.registerRoute('/auth', authController);
 	}
 
 	// Methods
-	private _registerRoute(path: string, controller: IController): void {
-		if (this._routes.has(path)) {
-			loggerHelper.warn(`Route ${path} already exists!`);
+	private registerRoute(path: string, controller: IController): void {
+		if (this.routes.has(path)) {
+			logUtil.warn(`Route ${path} already exists!`);
 			return;
 		}
 
-		this._routes.set(path, controller);
+		this.routes.set(path, controller);
 	}
 
 	public initRoutes(app: Application): void {
-		for (const [path, route] of this._routes) {
-			const router = this._createRouter(route);
+		for (const [path, route] of this.routes) {
+			const router = this.createRouter(route);
 
 			app.use(path, router);
 		}
 	}
 
-	private _createRouter(controller: IController): Router {
+	private createRouter(controller: IController): Router {
 		const router = Router();
 
 		for (const key in controller) {
@@ -54,5 +54,5 @@ export class RouterManager {
 	}
 }
 
-const routerManager = RouterManager.instance;
+const routerManager = RouterManager.getInstance();
 export default routerManager;

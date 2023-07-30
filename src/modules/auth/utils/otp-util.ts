@@ -2,12 +2,12 @@ import { redisClient } from '@databases/redis-db';
 
 export enum OtpTypeEnums {
 	REGISTER = 'register',
-	RESET_PASSWORD = 'reset-password',
+	RESETPASSWORD = 'reset-password',
 }
 
 const getOtpKey = (email: string, otpType: OtpTypeEnums) => `otp:${email}:${otpType}`;
 
-const otpHelper = {
+const otpUtil = {
 	saveOtp: async (email: string, otp: string, otpType: OtpTypeEnums) => {
 		const key = getOtpKey(email, otpType);
 		await redisClient.set(key, otp, {
@@ -27,4 +27,4 @@ const otpHelper = {
 	},
 };
 
-export default otpHelper;
+export default otpUtil;

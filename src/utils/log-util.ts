@@ -44,15 +44,15 @@ export const createLogger = (level?: string) => {
 	});
 };
 
-interface LoggerHelper extends winston.Logger {
+interface LoggerUtil extends winston.Logger {
 	line: () => void;
 }
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-const loggerHelper: LoggerHelper = createLogger();
-loggerHelper.line = (length = 50, char = '=') => {
-	loggerHelper.info(char.repeat(length));
+const logUtil: LoggerUtil = createLogger();
+logUtil.line = (length = 50, char = '=') => {
+	logUtil.info(char.repeat(length));
 };
 
-export default loggerHelper;
+export default logUtil;
