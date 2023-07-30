@@ -39,6 +39,13 @@ export class JwtHelper {
 		return jwt.sign(payload, this._secret, { expiresIn: this._rtExpiresIn });
 	}
 
+	public generateToken(payload: ITokenPayload): { accessToken: string; refreshToken: string } {
+		const accessToken = this.generateAccessToken(payload);
+		const refreshToken = this.generateRefreshToken(payload);
+
+		return { accessToken, refreshToken };
+	}
+
 	public decodeToken(token: string): Promise<ITokenPayload> {
 		return new Promise((resolve, reject) => {
 			jwt.verify(token, this._secret, (err, decoded) => {

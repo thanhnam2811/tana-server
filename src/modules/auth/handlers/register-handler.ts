@@ -6,8 +6,8 @@ import { IsEmail, IsNotEmpty, IsString, IsStrongPassword, Length } from 'class-v
 import { StatusCodes } from 'http-status-codes';
 import otpHelper, { OtpTypeEnums } from '../helpers/otp-helper';
 import passwordHelper from '../helpers/password-helper';
+import { TokenHelper } from '../helpers/token-helper';
 import sendWelcomeMail from '../utils/send-welcome-mail';
-import jwtHelper, { ITokenPayload } from '@helpers/jwt-helper';
 
 export class RegisterDto {
 	@IsNotEmpty({ message: 'Tên không được để trống!' })
@@ -40,7 +40,7 @@ export class RegisterDto {
 
 const registerHandler: IHandler<RegisterDto> = async (dto, res) => {
 	// Check if email is already registered
-	const existed = await UserModel.findOne({ email: dto.email }).exec();
+	const existed = await UserModel.findByEmail(dto.email);
 	if (existed) {
 		throw new HttpException(StatusCodes.CONFLICT, 'Email đã được đăng ký! Vui lòng sử dụng email khác!');
 	}
@@ -60,22 +60,23 @@ const registerHandler: IHandler<RegisterDto> = async (dto, res) => {
 	dto.password = hashedPassword;
 
 	// Create user
-	const user = await UserModel.create(dto);
+	const user = await UserModel.create({
+		...dto,
+		email: {
+			value: dto.email, // Save email value to email.value
+		},
+	});
 
 	// Log
-	loggerHelper.info(`🙋‍♂️ User "${user.email}" registered! ID: ${user._id}`);
+	loggerHelper.info(`🙋‍♂️ User "${dto.email}" registered! ID: ${user._id}`);
 
-	const payload: ITokenPayload = {
-		_id: user._id.toString(),
-		name: user.name,
-		email: user.email,
-	};
+	// Token
+	const tokenHelper = new TokenHelper(user);
 
-	const accessToken = jwtHelper.generateAccessToken(payload);
-	const refreshToken = jwtHelper.generateRefreshToken(payload);
+	const { accessToken, refreshToken } = tokenHelper.getToken();
 
 	// Send welcome email
-	sendWelcomeMail(user.email, user.name);
+	sendWelcomeMail(user.email.value, user.name);
 
 	// Response
 	res.status(StatusCodes.CREATED).json({

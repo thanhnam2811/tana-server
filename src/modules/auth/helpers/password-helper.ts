@@ -1,7 +1,7 @@
 import authConfig from '@configs/auth-config';
 import bcrypt from 'bcrypt';
 
-class PasswordHelper {
+export class PasswordHelper {
 	// Singleton
 	private static _instance: PasswordHelper;
 	public static get instance(): PasswordHelper {
@@ -22,10 +22,16 @@ class PasswordHelper {
 		this._additionalStr = authConfig.PASS_EXT;
 	}
 
-	// Methods
-	public async hash(plain: string): Promise<string> {
+	private _prepare(plain: string): string {
 		// Add additional string to password
 		const password = plain + this._additionalStr;
+
+		return password;
+	}
+
+	// Methods
+	public async hash(plain: string): Promise<string> {
+		const password = this._prepare(plain);
 
 		// Hash password
 		const salt = await bcrypt.genSalt(this._saltRounds);
@@ -33,9 +39,8 @@ class PasswordHelper {
 		return bcrypt.hash(password, salt);
 	}
 
-	public async compare(plain: string, hash: string): Promise<boolean> {
-		// Add additional string to password
-		const password = plain + this._additionalStr;
+	public compare(plain: string, hash: string): Promise<boolean> {
+		const password = this._prepare(plain);
 
 		return bcrypt.compare(password, hash);
 	}

@@ -33,6 +33,13 @@ export const createLogger = (level?: string) => {
 				frequency: '1h',
 				format: combine(upperCaseLevel(), ...formats),
 			}),
+			new winston.transports.DailyRotateFile({
+				level: 'error',
+				filename: `./logs/%DATE%.error.log`,
+				datePattern: 'YYYY-MM-DD-[[]HH[]]',
+				frequency: '1h',
+				format: combine(upperCaseLevel(), ...formats),
+			}),
 		],
 	});
 };

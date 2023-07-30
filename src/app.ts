@@ -82,7 +82,7 @@ export class App {
 
 	private _initRoutes(): void {
 		this._app.get('/', (req, res) => {
-			res.status(StatusCodes.OK).send('Hello world! From TANA with love!');
+			res.status(StatusCodes.OK).json({ message: 'Hello world! From TANA with love!' });
 		});
 
 		routerManager.initRoutes(this._app);

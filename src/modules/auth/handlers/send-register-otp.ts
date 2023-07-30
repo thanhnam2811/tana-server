@@ -15,7 +15,7 @@ export class SendRegisterOtpDto {
 
 const sendRegisterOtpHandler: IHandler<SendRegisterOtpDto> = async (dto, res) => {
 	// Check if email is already registered
-	const existed = await UserModel.findOne({ email: dto.email }).exec();
+	const existed = await UserModel.findByEmail(dto.email);
 	if (existed) {
 		throw new HttpException(StatusCodes.CONFLICT, 'Email đã được đăng ký! Vui lòng sử dụng email khác!');
 	}
