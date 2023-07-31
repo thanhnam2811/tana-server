@@ -4,21 +4,12 @@ import hbs from 'nodemailer-express-handlebars';
 import path from 'path';
 
 export class MailHelper {
-	// Singleton
-	private static instance: MailHelper;
-	public static getInstance(): MailHelper {
-		if (!MailHelper.instance) {
-			MailHelper.instance = new MailHelper();
-		}
-		return MailHelper.instance;
-	}
-
 	// Properties
 	private transporter: nodemailer.Transporter;
 	private from: string;
 
 	// Constructor
-	private constructor() {
+	constructor() {
 		this.from = `${mailConfig.NAME} <${mailConfig.FROM}>`;
 
 		this.transporter = nodemailer.createTransport({
@@ -77,5 +68,3 @@ export class MailHelper {
 		return this.transporter.sendMail({ from, to, subject, template, context: data });
 	}
 }
-
-export const mailHelper = MailHelper.getInstance();

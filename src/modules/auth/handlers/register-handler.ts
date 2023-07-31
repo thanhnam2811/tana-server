@@ -5,9 +5,9 @@ import UserModel from '@modules/user/user-model';
 import { IsEmail, IsNotEmpty, IsString, IsStrongPassword, Length } from 'class-validator';
 import { StatusCodes } from 'http-status-codes';
 import otpUtil, { OtpTypeEnums } from '../utils/otp-util';
-import { passwordHelper } from '../helpers/password-helper';
 import sendWelcomeMail from '../mails/send-welcome-mail';
 import { JwtHelper } from '@helpers/jwt-helper';
+import { PasswordHelper } from '../helpers/password-helper';
 
 export class RegisterDto {
 	@IsNotEmpty({ message: 'Tên không được để trống!' })
@@ -56,6 +56,7 @@ const registerHandler: IHandler<RegisterDto> = async (dto, res) => {
 	}
 
 	// Hash password
+	const passwordHelper = new PasswordHelper();
 	const hashedPassword = await passwordHelper.hash(dto.password);
 	dto.password = hashedPassword;
 

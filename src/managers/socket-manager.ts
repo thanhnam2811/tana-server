@@ -1,7 +1,7 @@
 import logUtil from '@utils/log-util';
 import { Server as SocketServer, Socket } from 'socket.io';
 import http from 'http';
-import jwtHelper from '@helpers/jwt-helper';
+import { JwtHelper } from '@helpers/jwt-helper';
 
 export class SocketManager {
 	// Singleton
@@ -98,14 +98,12 @@ export class SocketManager {
 				throw new Error('Token not found!');
 			}
 
-			const payload = (await jwtHelper.decodeToken(token)) as {
-				id: string;
-			};
+			const payload = await JwtHelper.decodeToken(token);
 			if (!payload) {
 				throw new Error('Empty payload!');
 			}
 
-			const userId = payload.id;
+			const userId = payload._id;
 			if (!this.users.has(userId)) {
 				this.users.set(userId, new Set()); // Create new Set for userId
 			}

@@ -2,22 +2,12 @@ import authConfig from '@configs/auth-config';
 import bcrypt from 'bcrypt';
 
 export class PasswordHelper {
-	// Singleton
-	private static instance: PasswordHelper;
-	public static getInstance(): PasswordHelper {
-		if (!PasswordHelper.instance) {
-			PasswordHelper.instance = new PasswordHelper();
-		}
-
-		return PasswordHelper.instance;
-	}
-
 	// Properties
 	private saltRounds: number;
 	private additionalStr: string;
 
 	// Constructor
-	private constructor() {
+	constructor() {
 		this.saltRounds = authConfig.PASS_SALT;
 		this.additionalStr = authConfig.PASS_EXT;
 	}
@@ -45,5 +35,3 @@ export class PasswordHelper {
 		return bcrypt.compare(password, hash);
 	}
 }
-
-export const passwordHelper = PasswordHelper.getInstance();

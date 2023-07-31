@@ -5,8 +5,8 @@ import UserModel from '@modules/user/user-model';
 import { IsEmail, IsNotEmpty, IsString, IsStrongPassword } from 'class-validator';
 import { StatusCodes } from 'http-status-codes';
 import { DateTime } from 'luxon';
-import { passwordHelper } from '../helpers/password-helper';
 import { JwtHelper } from '@helpers/jwt-helper';
+import { PasswordHelper } from '../helpers/password-helper';
 
 export class LoginDto {
 	@IsNotEmpty({ message: 'Email không được để trống!' })
@@ -76,6 +76,8 @@ const checkLock = async (user: IUser) => {
 };
 
 const checkPassword = async (user: IUser, password: string) => {
+	const passwordHelper = new PasswordHelper();
+
 	const isMatch = await passwordHelper.compare(password, user.password);
 	if (isMatch) return; // Skip if password is correct
 
